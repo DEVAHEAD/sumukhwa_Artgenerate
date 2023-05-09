@@ -1,6 +1,8 @@
 import os
 from keras_cv.models import StableDiffusion
 from PIL import Image
+import cv2
+from rembg import remove
 
 SEED = 119
 
@@ -29,16 +31,8 @@ def create_ai_image(np , pp ,project=None, limit=10):
         seed=SEED
     )
 
-    images = model.text_to_image(**options)
+    sd_image = model.text_to_image(**options)
+    rbg_image = remove(sd_image)
+    gray_image = cv2.cvtColor(rbg_image, cv2.COLOR_BGR2GRAY)
 
-    image_paths=[]
-    for i,image in enumerate(images):  
-
-        orig_image_path=os.path.join("art_generator\\media\\generatedImages\\",project.projectName+"_"+str(i)+".png")
-             
-        image.save(orig_image_path) 
-        image_paths.append(orig_image_path)
-    return images,image_paths
-
-if __name__=="__main__":
-    create_ai_image("","")
+    return gray_image
