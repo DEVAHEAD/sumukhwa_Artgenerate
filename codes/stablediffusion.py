@@ -34,5 +34,5 @@ def create_ai_image(np , pp ,project=None, limit=10):
     sd_image = model.text_to_image(**options)
     rbg_image = remove(sd_image)
     gray_image = cv2.cvtColor(rbg_image, cv2.COLOR_BGR2GRAY)
-
-    return gray_image
+    
+    gray_image.save('C:\Users\Soyeun_2\Desktop\DEVs\sumukhwa\sumukhwa_Artgenerate\generated_rmbg_gray\gray.png', 'png')

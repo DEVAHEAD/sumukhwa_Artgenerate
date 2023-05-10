@@ -1,8 +1,27 @@
 import os
 import numpy as np
 
+# pip install tensorflow==1.15 
+import tensorflow.compat.v2 as tf
+
 import tensorflow as tf
 from tensorflow import keras
+from keras.applications import imagenet_utils
+
+import VGG19
+
+def preprocess_input(x, data_format=None):
+    return imagenet_utils.preprocess_input(
+        x, data_format=data_format, mode="caffe"
+    )
+def decode_predictions(preds, top=5):
+    return imagenet_utils.decode_predictions(preds, top=top)
+preprocess_input.__doc__ = imagenet_utils.PREPROCESS_INPUT_DOC.format(
+    mode="",
+    ret=imagenet_utils.PREPROCESS_INPUT_RET_DOC_CAFFE,
+    error=imagenet_utils.PREPROCESS_INPUT_ERROR_DOC,
+)
+decode_predictions.__doc__ = imagenet_utils.decode_predictions.__doc__
 
 # Generated image size
 RESIZE_HEIGHT = 607
@@ -34,12 +53,12 @@ def preprocess_image(image_path, target_height, target_width):
     img = keras.preprocessing.image.load_img(image_path, target_size = (target_height, target_width))
     arr = keras.preprocessing.image.img_to_array(img)
     arr = np.expand_dims(arr, axis = 0)
-    arr = VGG19.preprocess_input(arr)
+    arr = VGG19.VGG19.preprocess_input(arr)
     return tf.convert_to_tensor(arr)
 
 def get_model():
     # Build a VGG19 model loaded with pre-trained ImageNet weights
-    model = vgg19.VGG19(weights = 'imagenet', include_top = False)
+    model = VGG19.vgg19.VGG19(weights = 'imagenet', include_top = False)
 
     # Get the symbolic outputs of each "key" layer (we gave them unique names).
     outputs_dict = dict([(layer.name, layer.output) for layer in model.layers])
@@ -93,10 +112,6 @@ def gram_matrix(x):
    gram = tf.matmul(features, tf.transpose(features))
    return gram
 
-def save_result(generated_image, result_height, result_width, name):
-    img = deprocess_image(generated_image, result_height, result_width)
-    keras.preprocessing.image.save_img(name, img)
-
 # Util function to convert a tensor into a valid image
 def deprocess_image(tensor, result_height, result_width):
     tensor = tensor.numpy()
@@ -110,3 +125,7 @@ def deprocess_image(tensor, result_height, result_width):
     # 'BGR'->'RGB'
     tensor = tensor[:, :, ::-1]
     return np.clip(tensor, 0, 255).astype("uint8")
+
+def save_result(generated_image, result_height, result_width, name):
+    img = deprocess_image(generated_image, result_height, result_width)
+    keras.preprocessing.image.save_img(name, img)

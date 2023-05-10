@@ -1,3 +1,4 @@
+# pip install tensorflow==1.15 
 import tensorflow.compat.v2 as tf
 
 from keras import backend
